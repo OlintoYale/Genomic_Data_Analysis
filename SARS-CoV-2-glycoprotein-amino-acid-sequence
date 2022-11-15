@@ -1,0 +1,88 @@
+#/usr/bin/env Rscript
+#       parameters: 2: the state(initials) and the time_window (number of months back from today)
+#       ie: Rscript /. . . ./Glycoprotein.R TX 2
+#           it will download the glycoprotein amino acid sequenses from samples submitted by the state of TX in the last 2 months
+
+## 
+library("easypackages");libraries("ape","rentrez","lubridate","stringr","seqinr", "tidyverse")
+options(timeout = 700, "width"=400);args = commandArgs(trailingOnly=T);
+args[1]<- c("UT"); args[1]
+args[2] <-c("2");  args[2]
+base<-paste("surface glycoprotein AND ",args[1]," AND SARS-CoV-2 AND COLLECTION_DATE=",sep="")
+base
+toff<-args[2];toff<-as.numeric(toff)
+locus<-paste(base,seq(ymd(Sys.Date())%m+% months(-toff), ymd(Sys.Date()), by="days"),sep="")
+cat("Please wait, searching the NCBI/GenBank/protein DB for SARS-CoV-2-Glycoprotein amino acid sequences within collection date between ",
+    as.character(ymd(Sys.Date())%m+% months(-toff)), "and", as.character(Sys.Date()), "\n")
+
+
+#SPIKE PROTEINS IDS
+length(Records)
+ProteinsID<-vector(); ProteinsID<-0;Records<-vector();k<-0; lop = 0; j = 0; 
+nn<-length(seq(ymd(Sys.Date())%m+% months(-toff), ymd(Sys.Date()), by="days"))
+for (i in 1:nn){
+  r_search <- entrez_search(db="Protein", term=locus[i]); r_search$ids;
+  Records<-c(Records, t(r_search$ids));
+  cat(i,"\t", r_search$ids,"\n");
+     bb<-r_search$ids
+     if(length(bb) >0){
+           lop
+              for (j in 1:length(bb)){
+                  ProteinsID[j+lop] = bb[j]
+               }
+         lop = length(bb)+lop; 
+         j = 0;
+           }
+}
+
+cat("Please wait, downloading", length(Records), "Glycoprotein_SARS-CoV-2 amino acid sequences submitted by the state of",args[1],"\n")
+# GenBankIds
+GenBankID<-vector(); 
+length(ProteinsID)
+for(i in 1:length(ProteinsID)){
+  id<-ProteinsID[i];
+  p1<-entrez_fetch(db = "Protein", id,rettype = "txt");
+  p2<-noquote(unlist(strsplit(p1,"\n"))); 
+  p2[1]
+  for (j in 1:20){
+    px2<-noquote(unlist(strsplit(p2[j],"[ ]")));
+    tt<-px2[1]
+    if(tt=="DBSOURCE")
+    {
+      a3<-px2[6]
+      IDGenBank<-noquote(unlist(strsplit(a3,"[.]"))[1:1]); 
+     }
+  }
+  GenBankID<-c(GenBankID, IDGenBank)
+}
+
+link_Spike_GenBank<-cbind(ProteinsID,GenBankID)
+head(link_Spike_GenBank, 10)
+
+## Spike protein amino-acid sequences
+#cat("Please wait, downloading/storing", length(Records), "Glycoprotein_aa_sequences","\n")
+bigqueryindex <- split(Records,ceiling(seq_along(Records)/200));SARS2_seq<-vector()
+
+for (i in bigqueryindex){
+  part_seq<-entrez_fetch(db="protein",i,rettype = "fasta")
+  part_seq<-unlist(strsplit(part_seq,"\n"))
+  SARS2_seq<-c(SARS2_seq,part_seq)
+}
+
+SARS2_seq<-unlist(strsplit(SARS2_seq,"\n"))
+header.lines <- grep(">", SARS2_seq)
+seq.pos <- cbind(start = grep(">", SARS2_seq) + 1, stop = c(grep(">", SARS2_seq)[-1] - 1, length(SARS2_seq)))
+seq.fasta <- apply(seq.pos, 1, function(x){
+  paste0(SARS2_seq[ seq(as.numeric(x["start"]), as.numeric(x["stop"])) ], sep = "", collapse = "")
+})
+
+names(seq.fasta) <- str_sub(SARS2_seq[grep(">", SARS2_seq)],2,-1)
+seq.fasta <- tibble(label = names(seq.fasta), sequence = seq.fasta)
+seq.fasta$len=nchar((seq.fasta$sequence))
+write.fasta(as.list(seq.fasta$sequence), names=seq.fasta$label,as.string=T,nbchar = 60,
+            file.out=paste(noquote(args[1]),"_State_Glycoprotein_SARS_CoV_2_AA_sequences_",Sys.Date(),".fasta",sep =""))
+write.csv(link_Spike_GenBank, paste(noquote(args[1]),"_State_SpikeID_GenBankID_",Sys.Date(),".csv",sep =""))
+cat("date stored at ",getwd())
+
+
+
