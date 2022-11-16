@@ -3,7 +3,6 @@
 #       ie: Rscript /. . . ./Glycoprotein.R TX 2
 #           it will download the glycoprotein amino acid sequenses from samples submitted by the state of TX in the last 2 months
 
-## 
 library("easypackages");libraries("ape","rentrez","lubridate","stringr","seqinr", "tidyverse")
 options(timeout = 700, "width"=400);args = commandArgs(trailingOnly=T);
 args[1]<- c("UT"); args[1]
@@ -16,8 +15,7 @@ cat("Please wait, searching the NCBI/GenBank/protein DB for SARS-CoV-2-Glycoprot
     as.character(ymd(Sys.Date())%m+% months(-toff)), "and", as.character(Sys.Date()), "\n")
 
 
-#SPIKE PROTEINS IDS
-length(Records)
+# Spike protein IDs for the time-window/location specified by the user
 ProteinsID<-vector(); ProteinsID<-0;Records<-vector();k<-0; lop = 0; j = 0; 
 nn<-length(seq(ymd(Sys.Date())%m+% months(-toff), ymd(Sys.Date()), by="days"))
 for (i in 1:nn){
@@ -36,6 +34,7 @@ for (i in 1:nn){
 }
 
 cat("Please wait, downloading", length(Records), "Glycoprotein_SARS-CoV-2 amino acid sequences submitted by the state of",args[1],"\n")
+
 # GenBankIds
 GenBankID<-vector(); 
 length(ProteinsID)
