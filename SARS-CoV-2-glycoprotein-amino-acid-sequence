@@ -82,7 +82,7 @@ seq.fasta$len=nchar((seq.fasta$sequence))
 write.fasta(as.list(seq.fasta$sequence), names=seq.fasta$label,as.string=T,nbchar = 60,
             file.out=paste(noquote(args[1]),"_State_Glycoprotein_SARS_CoV_2_AA_sequences_",Sys.Date(),".fasta",sep =""))
 write.csv(link_Spike_GenBank, paste(noquote(args[1]),"_State_SpikeID_GenBankID_",Sys.Date(),".csv",sep =""))
-cat("date stored at ",getwd())
+cat("data stored at ",getwd())
 
 
 
