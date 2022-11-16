@@ -5,8 +5,7 @@
 
 library("easypackages");libraries("ape","rentrez","lubridate","stringr","seqinr", "tidyverse")
 options(timeout = 700, "width"=400);args = commandArgs(trailingOnly=T);
-args[1]<- c("UT"); args[1]
-args[2] <-c("2");  args[2]
+
 base<-paste("surface glycoprotein AND ",args[1]," AND SARS-CoV-2 AND COLLECTION_DATE=",sep="")
 base
 toff<-args[2];toff<-as.numeric(toff)
