@@ -4,9 +4,12 @@
 #   22/11/10 
 #   Rscript to download the SARS-CoV-2 glycoprotein amino acid sequences for a specific US/State and within specific sample collection date specified 
 #   by the user
-#   Parameters: 2: the state(initials in CAPITAL letters) and the time_window (number of months back from today)
+#   Parameters 2:
+#               (1): the state(initials in CAPITAL letters) and (2): The time_window (number of months back from today)
 #               ie: Rscript /. . . ./Glycoprotein.R TX 2
 #               it will download the SARS-CoV-2 Glycoprotein amino acid sequenses from samples submitted by the state of TX in the last 2 months
+#
+#   Output: two files: One With the SARS_CoV-2 Glycoprotein amino-acid sequeces; A secon file (.csv)with the link ids between the Protein_ID and wgsID 
 
 library("easypackages");libraries("ape","rentrez","lubridate","stringr","seqinr", "tidyverse","crayon")
 options(timeout = 700, "width"=400);args = commandArgs(trailingOnly=T);
